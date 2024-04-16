@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from uuid import UUID
 from motor.core import AgnosticClient
@@ -31,10 +32,17 @@ class ProductUsecase:
 
         return ProductOut(**result)
 
-    async def query(self) -> List[ProductOut]:
-        return [ProductOut(**item) async for item in self.collection.find()]
+    async def query(self, apply_filter: bool) -> List[ProductOut]:
+        filter = {}
+        if apply_filter:
+            filter={"price": {"$lt": 8000, "$gt": 5000}}
+        return [ProductOut(**item) async for item in self.collection.find(
+            filter=filter
+        )]
 
     async def update(self, id: UUID, body: ProductUpdate) -> ProductUpdateOut:
+        if not body.updated_at:
+            body.updated_at = datetime.now()
         result = await self.collection.find_one_and_update(
             filter={"id": id},
             update={"$set": body.model_dump(exclude_none=True)},

@@ -30,8 +30,8 @@ async def get(
 
 
 @router.get(path="/", status_code=status.HTTP_200_OK)
-async def query(usecase: ProductUsecase = Depends()) -> List[ProductOut]:
-    return await usecase.query()
+async def query(apply_filter: bool = False,usecase: ProductUsecase = Depends()) -> List[ProductOut]:
+    return await usecase.query(apply_filter)
 
 
 @router.patch(path="/{id}", status_code=status.HTTP_200_OK)
