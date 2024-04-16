@@ -6,7 +6,7 @@ from pymongo.database import Database
 from store.db.mongo import db_client
 from store.models.product import ProductModel
 from store.schemas.product import ProductIn, ProductOut, ProductUpdate, ProductUpdateOut
-from store.core.exceptions import NotFoundException
+from store.core.exceptions import NotFoundException, BaseException
 
 
 class ProductUsecase:
@@ -17,6 +17,8 @@ class ProductUsecase:
 
     async def create(self, body: ProductIn) -> ProductOut:
         product_model = ProductModel(**body.model_dump())
+        if product_model.quantity < 0:
+            raise BaseException(message="Quantidade não pode ser negativa")
         self.collection.insert_one(product_model.model_dump())
 
         return ProductOut(**product_model.model_dump())

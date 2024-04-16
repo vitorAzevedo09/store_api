@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytest
 from store.core.exceptions import NotFoundException, BaseException
-from store.schemas.product import ProductOut, ProductUpdateOut
+from store.schemas.product import ProductIn, ProductOut, ProductUpdateOut
 from store.usecases.product import product_usecase
 
 
@@ -14,13 +14,14 @@ async def test_usecases_create_should_return_success(product_in):
     assert result.name == "Iphone 14 Pro Max"
 
 
-async def test_usecases_post_should_internal_server_error(product_in):
+async def test_usecases_post_should_internal_server_error(product_in: ProductIn):
     with pytest.raises(BaseException) as err:
-         await product_usecase.create(body=product_in)
+        product_in.quantity = -1
+        await product_usecase.create(body=product_in)
 
     assert (
         err.value.message
-        == "Internal Server Error"
+        == "Quantidade não pode ser negativa"
     )
 
 
