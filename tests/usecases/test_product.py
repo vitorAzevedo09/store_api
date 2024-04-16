@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 import pytest
-from store.core.exceptions import NotFoundException
+from store.core.exceptions import NotFoundException, BaseException
 from store.schemas.product import ProductOut, ProductUpdateOut
 from store.usecases.product import product_usecase
 
@@ -12,6 +12,16 @@ async def test_usecases_create_should_return_success(product_in):
 
     assert isinstance(result, ProductOut)
     assert result.name == "Iphone 14 Pro Max"
+
+
+async def test_usecases_post_should_internal_server_error(product_in):
+    with pytest.raises(BaseException) as err:
+         await product_usecase.create(body=product_in)
+
+    assert (
+        err.value.message
+        == "Internal Server Error"
+    )
 
 
 async def test_usecases_get_should_return_success(product_inserted):

@@ -1,7 +1,8 @@
 from typing import List
 from uuid import UUID
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.core import AgnosticClient
 import pymongo
+from pymongo.database import Database
 from store.db.mongo import db_client
 from store.models.product import ProductModel
 from store.schemas.product import ProductIn, ProductOut, ProductUpdate, ProductUpdateOut
@@ -10,13 +11,13 @@ from store.core.exceptions import NotFoundException
 
 class ProductUsecase:
     def __init__(self) -> None:
-        self.client: AsyncIOMotorClient = db_client.get()
-        self.database: AsyncIOMotorDatabase = self.client.get_database()
+        self.client: AgnosticClient = db_client.get()
+        self.database: Database = self.client.get_database()
         self.collection = self.database.get_collection("products")
 
     async def create(self, body: ProductIn) -> ProductOut:
         product_model = ProductModel(**body.model_dump())
-        await self.collection.insert_one(product_model.model_dump())
+        self.collection.insert_one(product_model.model_dump())
 
         return ProductOut(**product_model.model_dump())
 
